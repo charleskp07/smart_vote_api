@@ -121,7 +121,30 @@ class CompetitionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $competition = Competition::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'user_id'     => 'required|exists:users,id',
+                'name'        => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'start_date'  => 'required|date',
+                'end_date'    => 'required|date|after_or_equal:start_date',
+                'vote_value'  => 'required|integer|min:0',
+            ]);
+
+            $competition->update($validatedData);
+
+            return response()->json([
+                'message' => 'Compétition mise à jour avec succès !',
+                'data'    => $competition->load('user')
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error'   => 'Erreur lors de la mise à jour de la compétition.',
+                'details' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -129,6 +152,19 @@ class CompetitionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+
+            $competition = Competition::findOrFail($id);
+            $competition->delete();
+
+            return response()->json([
+                'message' => 'Compétition supprimée avec succès !'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'Erreur lors de la suppression de la compétition.',
+                'details' => $th->getMessage(),
+            ], 500);
+        }
     }
 }
