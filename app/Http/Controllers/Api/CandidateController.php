@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Candidate;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,8 @@ class CandidateController extends Controller
      */
     public function index()
     {
-        //
+        $candidates = Candidate::all();
+        return response()->json($candidates);
     }
 
     /**
@@ -28,7 +30,29 @@ class CandidateController extends Controller
      */
     public function store(Request $request)
     {
-        //
+         $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'gender' => 'required|string|MASCULIN , FEMININ',
+            'birth_date' => 'required|date',
+            'height' => 'required|numeric',
+            'weight' => 'required|numeric',
+            'nationality' => 'required|string|max:255',
+            'description' => 'required|string',
+            'photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        $data = $request->all();
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('candidates', 'public');
+            $data['photo'] = asset('storage/' . $path);
+        }
+
+        $candidate = Candidate::create($data);
+
+        return response()->json($candidate, 201);
+    
     }
 
     /**
@@ -36,7 +60,11 @@ class CandidateController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $candidate = Candidate::find($id);
+        if (is_null($candidate)) {
+            return response()->json(['message' => 'Candidat introuvable'], 404);
+        }
+        return response()->json($candidate);
     }
 
     /**
