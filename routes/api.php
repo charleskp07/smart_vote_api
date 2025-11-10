@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CompetitionController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VoteController;
 use App\Http\Middleware\SuperAdminMiddleware;
@@ -21,6 +22,7 @@ Route::post('/fedapay/callback', [VoteController::class, 'fedapayCallback'])->na
 
 Route::middleware("auth:sanctum")->group(function () {
    Route::post('/logout', [AuthController::class, 'logout']);
+   Route::apiResource('/competitions', CompetitionController::class);
 
    Route::middleware([SuperAdminMiddleware::class])->group(function () {
 

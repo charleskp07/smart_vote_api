@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Candidate;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use Illuminate\Support\Facades\Storage;
