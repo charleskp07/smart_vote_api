@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use App\Enums\GenderEnums;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,6 +14,19 @@ return new class extends Migration
     {
         Schema::create('candidates', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Competition::class)->onDelete('cascade');            
+            $table->string('photo');
+            $table->string('first_name');
+            $table->string('last_name');
+             $table->enum('gender', [
+                GenderEnums::MASCULIN,
+                GenderEnums::FEMININ,
+            ]);
+            $table->date('birth_date');
+            $table->float('height')->nullable();
+            $table->float('weight')->nullable();
+            $table->string('nationality');
+            $table->text('description');
             $table->timestamps();
         });
     }

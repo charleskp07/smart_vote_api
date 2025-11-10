@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\RoleEnums;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -12,7 +15,16 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        try {
+
+            return User::all();
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors du traitement, Réessayez !',
+                'error' => $ex->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -28,7 +40,30 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'phone' => $request->phone,
+            'role' => RoleEnums::ADMIN->value,
+        ];
+
+        try {
+
+            $user = User::create($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Utilisateur créé avec succes",
+                'data' => $user,
+            ], 201);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors du traitement, Réessayez !',
+                'error' => $ex->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -36,7 +71,17 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+
+        try {
+
+            return User::find($id);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors du traitement, Réessayez !',
+                'error' => $ex->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -52,7 +97,38 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'phone' => $request->phone,
+        ];
+
+        try {
+
+            $user = User::find($id);
+
+            if (!$user) {
+                return [
+                    "message" => "Utilisateur non trouvé !",
+                ];
+            }
+
+            $user->update($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Utilisateur mise à jour avec succes",
+                'data' => $user,
+            ], 201);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors du traitement, Réessayez !',
+                'error' => $ex->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -60,6 +136,36 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+
+            $user = User::find($id);
+
+            if (!$user) {
+                return [
+                    "message" => "Utilisateur non trouvé !",
+                ];
+            }
+
+            if ($id != Auth::id() && $id != 1) {
+
+                $user->delete();
+
+                return [
+                    "message" => "Utilisateur supprimé avec succès !",
+                ];
+            }
+
+            return [
+                "message"  => "Impossible de s'auto-supprimer"
+            ];
+
+
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors du traitement, Réessayez !',
+                'error' => $ex->getMessage()
+            ], 500);
+        }
     }
 }
