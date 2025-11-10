@@ -13,9 +13,16 @@ return new class extends Migration
     {
         Schema::create('competitions', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(User::class)->onDelete('cascade');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
+            $table->integer('vote_value')->default(100);
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
@@ -24,4 +31,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('competitions');
     }
+
+
 };

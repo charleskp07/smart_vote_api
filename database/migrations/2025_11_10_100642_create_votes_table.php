@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('votes', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Candidate::class)->onDelete('cascade');    
+            $table->string('full_name');
+            $table->string('phone_number');
+            $table->integer('vote_number');
             $table->timestamps();
         });
     }
