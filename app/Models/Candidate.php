@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Candidate extends Model
 {
-    
     protected $fillable = [
         'competition_id',
         'photo',
@@ -20,28 +19,15 @@ class Candidate extends Model
         'weight',
         'nationality',
         'description',
-
     ];
 
-    public function votes() : HasMany
+    public function votes(): HasMany
     {
         return $this->hasMany(Vote::class);
     }
 
-    public function competition() : BelongsTo
+    public function competition(): BelongsTo
     {
         return $this->belongsTo(Competition::class);
     }
-
-
-
-
-
-
-
-
 }
-
-
-
-
