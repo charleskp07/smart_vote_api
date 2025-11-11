@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Enums\RoleEnums;
 use App\Http\Controllers\Controller;
@@ -18,6 +18,7 @@ class UserController extends Controller
         try {
 
             return User::all();
+
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -167,5 +168,28 @@ class UserController extends Controller
                 'error' => $ex->getMessage()
             ], 500);
         }
+    }
+
+
+    public function trash()
+    {
+        try {
+
+            $trashed = User::onlyTrashed()->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Corbeille",
+                'data' => $trashed,
+            ], 200);
+
+        } catch (\Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors du traitement, Réessayez !',
+                'error' => $ex->getMessage()
+            ], 500);
+        }
+
     }
 }

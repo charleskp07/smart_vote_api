@@ -20,10 +20,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', [
-                RoleEnums::SYSTEME_ADMIN,
-                RoleEnums::ADMIN,
+                RoleEnums::SYSTEME_ADMIN->value,
+                RoleEnums::ADMIN->value,
             ]);
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

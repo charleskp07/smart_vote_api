@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Competition;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -16,12 +17,15 @@ class CompetitionController extends Controller
     public function index()
     {
         try {
+
             $competitions = Competition::with('user')->get();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Liste des compétitions récupérée avec succès',
                 'data' => $competitions
             ], 200);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -37,26 +41,20 @@ class CompetitionController extends Controller
      */
     public function store(Request $request)
     {
+
+        $data = [
+            'user_id' => Auth::user()->id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'vote_value' => $request->vote_value,
+        ];
+
+
         try {
 
-            $validator = Validator::make($request->all(), [
-                'user_id' => 'required|exist:users,id',
-                'name' => 'required|string|max:225',
-                'description' => 'nullable|string',
-                'start_date' => 'required|date',
-                'end_date' => 'required|date|after_or_equal:start_date',
-                'vote_value' => 'integer|min:100'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Erreur de validation',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $competition = Competition::create($request->all());
+            $competition = Competition::create($data);
 
             return response()->json([
                 'status' => true,
@@ -77,21 +75,24 @@ class CompetitionController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $competition = Competition::with('user')->find($id);
+        $competition = Competition::with('user')->find($id);
 
-            if (!$competition) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Compétition non trouvée'
-                ], 404);
-            }
+
+        if (!$competition) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Compétition non trouvée'
+            ], 404);
+        }
+
+        try {
 
             return response()->json([
                 'status' => true,
                 'message' => 'Compétition trouvée avec succès',
                 'data' => $competition
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -107,19 +108,20 @@ class CompetitionController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $competition = Competition::findOrFail($id);
+
+        $data = [
+            'user_id' => Auth::user()->id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'vote_value' => $request->vote_value,
+        ];
+
         try {
-            $competition = Competition::findOrFail($id);
 
-            $validatedData = $request->validate([
-                'user_id'     => 'required|exists:users,id',
-                'name'        => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'start_date'  => 'required|date',
-                'end_date'    => 'required|date|after_or_equal:start_date',
-                'vote_value'  => 'required|integer|min:0',
-            ]);
-
-            $competition->update($validatedData);
+            $competition->update($data);
 
             return response()->json([
                 'message' => 'Compétition mise à jour avec succès !',
@@ -138,9 +140,10 @@ class CompetitionController extends Controller
      */
     public function destroy(string $id)
     {
+        $competition = Competition::findOrFail($id);
+
         try {
 
-            $competition = Competition::findOrFail($id);
             $competition->delete();
 
             return response()->json([
