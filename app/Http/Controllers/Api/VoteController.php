@@ -3,63 +3,91 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Candidate;
+use App\Models\Vote;
+use FedaPay\FedaPay;
+use FedaPay\Transaction;
 use Illuminate\Http\Request;
 
 class VoteController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Étape 1 : Créer une transaction FedaPay
      */
-    public function index()
+    public function initPayment(Request $request)
     {
-        //
+        $request->validate([
+            'candidate_id' => 'required|exists:candidates,id',
+            'full_name' => 'required|string',
+            'phone_number' => 'required|string',
+            'vote_number' => 'required|integer|min:1',
+        ]);
+
+
+        $candidate = Candidate::with('competition')->findOrFail($request->candidate_id);
+
+        $votePrice = $candidate->competition->vote_value;
+
+        $amount = $request->vote_number * $votePrice;
+
+        FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY'));
+        FedaPay::setEnvironment(env('FEDAPAY_MODE', 'sandbox'));
+
+
+        $transaction = Transaction::create([
+            'description' => "Vote pour {$candidate->firstname} {$candidate->lastname}",
+            'amount' => $amount,
+            'currency' => ['iso' => 'XOF'],
+            'callback_url' => route('fedapay.callback'),
+
+            'customer' => [
+                'firstname' => $request->full_name,
+                'phone_number' => $request->phone_number,
+            ],
+
+            'metadata' => [
+                'candidate_id' => $candidate->id,
+                'full_name' => $request->full_name,
+                'phone_number' => $request->phone_number,
+                'vote_number' => $request->vote_number,
+                'competition_id' => $candidate->competition->id,
+                'vote_value' => $votePrice,
+            ],
+        ]);
+
+        return response()->json([
+            'payment_url' => $transaction->generateToken()->url,
+            'reference' => $transaction->reference,
+            'amount' => $amount,
+            'vote_value' => $votePrice,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    // Étape 2 : Callback FedaPay
+    //  Créer le vote après paiement réussi
+     
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function fedapayCallback(Request $request)
     {
-        //
-    }
+        $reference = $request->input('reference');
+        $status = $request->input('status');
+        $metadata = $request->input('metadata', []);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        if ($status === 'approved') {
+            if (!Vote::where('payment_reference', $reference)->exists()) {
+                Vote::create([
+                    'candidate_id' => $metadata['candidate_id'],
+                    'full_name' => $metadata['full_name'],
+                    'phone_number' => $metadata['phone_number'],
+                    'vote_number' => $metadata['vote_number'],
+                    'amount' => $metadata['vote_number'] * $metadata['vote_value'],
+                    'payment_reference' => $reference,
+                    'payment_status' => 'paid',
+                ]);
+            }
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['success' => true]);
     }
 }

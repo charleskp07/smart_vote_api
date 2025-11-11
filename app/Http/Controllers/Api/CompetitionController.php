@@ -21,7 +21,7 @@ class CompetitionController extends Controller
                 'status' => true,
                 'message' => 'Liste des compétitions récupérée avec succès',
                 'data' => $competitions
-            ],200);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -31,27 +31,21 @@ class CompetitionController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-       
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-         try {
-            $validator = Validator::make($request->all(),[
+        try {
+
+            $validator = Validator::make($request->all(), [
                 'user_id' => 'required|exist:users,id',
-                 'name' => 'required|string|max:225',
-                  'description' => 'nullable|string',
-                   'start_date' => 'required|date',
-                    'end_date' => 'required|date|after_or_equal:satrt_date',
-                     'vote_value' => 'integer|min:0'
+                'name' => 'required|string|max:225',
+                'description' => 'nullable|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'vote_value' => 'integer|min:100'
             ]);
 
             if ($validator->fails()) {
@@ -98,7 +92,6 @@ class CompetitionController extends Controller
                 'message' => 'Compétition trouvée avec succès',
                 'data' => $competition
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -108,13 +101,6 @@ class CompetitionController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.

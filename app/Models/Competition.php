@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Competition extends Model
-
 {
 
     protected $fillable = [
@@ -17,21 +16,16 @@ class Competition extends Model
         'start_date',
         'end_date',
         'vote_value',
-        
+
     ];
 
-    public function candidates() : HasMany
+    public function candidates(): HasMany
     {
         return $this->hasMany(Candidate::class);
     }
 
-    public function competition() : BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    }
-
-
-
-
-
+}

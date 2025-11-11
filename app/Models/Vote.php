@@ -9,11 +9,14 @@ class Vote extends Model
 {
     protected $fillable = [
         "candidate_id",
-        'id',
         'full_name',
         'phone_number',
         'vote_number',
-        
+        'payment_reference',
+        'payment_status',
+        'amount',
+        'payment_status',
+      
     ];
 
     public function candidate() : BelongsTo

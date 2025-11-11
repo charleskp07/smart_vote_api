@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Candidate;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,10 +14,13 @@ return new class extends Migration
     {
         Schema::create('votes', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Candidate::class)->onDelete('cascade');    
+            $table->foreignIdFor(Candidate::class)->onDelete('cascade');
             $table->string('full_name');
             $table->string('phone_number');
-            $table->integer('vote_number');
+            $table->integer('vote_number')->default(1); // nombre de votes achetés
+            $table->string('payment_reference')->nullable(); // référence FedaPay
+            $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
+            $table->decimal('amount', 10, 2)->default(0);
             $table->timestamps();
         });
     }
