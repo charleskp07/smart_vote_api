@@ -30,9 +30,8 @@ class VoteController extends Controller
 
         $amount = $request->vote_number * $votePrice;
 
-        FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY'));
-        FedaPay::setEnvironment(env('FEDAPAY_MODE', 'sandbox'));
-
+        Fedapay::setApiKey(env('FEDAPAY_SECRET_KEY'));
+        Fedapay::setEnvironment(env('FEDAPAY_MODE', 'sandbox'));
 
         $transaction = Transaction::create([
             'description' => "Vote pour {$candidate->firstname} {$candidate->lastname}",
@@ -66,7 +65,7 @@ class VoteController extends Controller
 
     // Étape 2 : Callback FedaPay
     //  Créer le vote après paiement réussi
-     
+
 
     public function fedapayCallback(Request $request)
     {

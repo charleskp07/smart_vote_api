@@ -17,10 +17,11 @@ return new class extends Migration
             $table->foreignIdFor(Candidate::class)->onDelete('cascade');
             $table->string('full_name');
             $table->string('phone_number');
-            $table->integer('vote_number')->default(1); // nombre de votes achetés
-            $table->string('payment_reference')->nullable(); // référence FedaPay
+            $table->integer('vote_number')->default(1); 
+            $table->string('payment_reference')->nullable();
             $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
-            $table->decimal('amount', 10, 2)->default(0);
+            $table->decimal('amount', 10, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

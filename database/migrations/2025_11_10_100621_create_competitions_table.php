@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->integer('vote_value')->default(100);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
