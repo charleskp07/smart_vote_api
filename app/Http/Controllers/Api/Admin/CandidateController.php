@@ -39,15 +39,15 @@ class CandidateController extends Controller
     public function store(Request $request)
     {
 
-        // $file = $request->file('photo');
+        $file = $request->file('photo');
 
-        // if ($file)
-        //     $path = $file->store('candidates/photo', 'public');
+        if ($file)
+            $path = $file->store('candidates/photo', 'public');
 
         $data = [
             'competition_id' => $request->competition_id,
-            // 'photo' => $file ? $path : null,
-            'photo' => $request->photo,
+            'photo' => $file ? $path : null,
+            // 'photo' => $request->photo,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'gender' => $request->gender,
@@ -84,10 +84,29 @@ class CandidateController extends Controller
     public function show(string $id)
     {
         $candidate = Candidate::find($id);
-        if (is_null($candidate)) {
-            return response()->json(['message' => 'Candidat introuvable'], 404);
+
+
+        if (!$candidate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Candidat non trouvée'
+            ], 404);
         }
-        return response()->json($candidate);
+
+        try {
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Candidat trouvée avec succès',
+                'data' => $candidate
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Erreur lors de la récupération',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -136,7 +155,6 @@ class CandidateController extends Controller
                 'message' => 'Candidat mise à jour avec succès !',
                 'data'    => $candidate->load('competition')
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'error'   => 'Erreur lors de la mise à jour de la Candidat.',
@@ -156,19 +174,17 @@ class CandidateController extends Controller
         }
 
         try {
-            
+
             $candidate->delete();
 
             return response()->json([
                 'message' => 'candidat(e) supprimée avec succès !'
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'error' => 'Erreur lors de la suppression de la candidat(e).',
                 'details' => $th->getMessage(),
             ], 500);
         }
-
     }
 }

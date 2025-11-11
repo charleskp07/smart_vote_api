@@ -30,18 +30,19 @@ class VoteController extends Controller
 
         $amount = $request->vote_number * $votePrice;
 
-        Fedapay::setApiKey(env('FEDAPAY_SECRET_KEY'));
-        Fedapay::setEnvironment(env('FEDAPAY_MODE', 'sandbox'));
+        \FedaPay\Fedapay::setApiKey('sk_sandbox_228oRPWbueWIryCFxrujSeUN');
+        \FedaPay\Fedapay::setEnvironment('sandbox');
 
-        $transaction = Transaction::create([
+        $transaction = \FedaPay\Transaction::create([
             'description' => "Vote pour {$candidate->firstname} {$candidate->lastname}",
             'amount' => $amount,
             'currency' => ['iso' => 'XOF'],
-            'callback_url' => route('fedapay.callback'),
-
+            'callback_url' => 'https://example.com/callback',
+            // 'callback_url' => "https://awless-ozell-fibriform.ngrok-free.dev",
             'customer' => [
                 'firstname' => $request->full_name,
                 'phone_number' => $request->phone_number,
+                "email" => "jsmith@example.com",
             ],
 
             'metadata' => [
