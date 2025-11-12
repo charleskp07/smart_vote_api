@@ -42,8 +42,15 @@ class CompetitionController extends Controller
     public function store(Request $request)
     {
 
+        $file = $request->file('image');
+
+        if ($file)
+            $path = $file->store('competitions/image', 'public');
+
+
         $data = [
             'user_id' => Auth::user()->id,
+            'image' => $file ? $path : null,
             'name' => $request->name,
             'description' => $request->description,
             'start_date' => $request->start_date,
@@ -118,6 +125,9 @@ class CompetitionController extends Controller
             'end_date' => $request->end_date,
             'vote_value' => $request->vote_value,
         ];
+
+        if (isset($path))
+            $data['image'] = $path;
 
         try {
 

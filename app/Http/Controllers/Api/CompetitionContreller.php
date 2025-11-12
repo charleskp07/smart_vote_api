@@ -24,13 +24,13 @@ class CompetitionContreller extends Controller
                 ->get();
 
             return response()->json([
-                'status' => true,
+                'success' => true,
                 'message' => 'Liste des compétitions créées par cet utilisateur récupérée avec succès',
                 'data' => $competitions
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'Erreur lors du chargement des compétitions',
                 'error' => $e->getMessage()
             ], 500);
@@ -45,8 +45,16 @@ class CompetitionContreller extends Controller
      */
     public function store(Request $request)
     {
+
+        $file = $request->file('image');
+
+        if ($file)
+            $path = $file->store('competitions/image', 'public');
+
+
         $data = [
             'user_id' => Auth::user()->id,
+            'image' => $file ? $path : null,
             'name' => $request->name,
             'description' => $request->description,
             'start_date' => $request->start_date,
@@ -127,6 +135,9 @@ class CompetitionContreller extends Controller
             'end_date' => $request->end_date,
             'vote_value' => $request->vote_value,
         ];
+
+        if (isset($path))
+            $data['image'] = $path;
 
         try {
 

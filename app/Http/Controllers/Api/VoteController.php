@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Vote;
+use FedaPay\Customer;
 use FedaPay\FedaPay;
 use FedaPay\Transaction;
 use Illuminate\Http\Request;
@@ -26,23 +27,39 @@ class VoteController extends Controller
 
         $candidate = Candidate::with('competition')->findOrFail($request->candidate_id);
 
+        if (!$candidate) {
+            return response()->json([
+                'success' => false,
+                'error' => 'candidate non trouvé',
+            ], 400);
+        }
+
         $votePrice = $candidate->competition->vote_value;
 
         $amount = $request->vote_number * $votePrice;
 
-        \FedaPay\Fedapay::setApiKey('sk_sandbox_228oRPWbueWIryCFxrujSeUN');
-        \FedaPay\Fedapay::setEnvironment('sandbox');
+        Fedapay::setApiKey('sk_sandbox_228oRPWbueWIryCFxrujSeUN');
+        Fedapay::setEnvironment('sandbox');
 
-        $transaction = \FedaPay\Transaction::create([
-            'description' => "Vote pour {$candidate->firstname} {$candidate->lastname}",
+
+        $client = Customer::create(array(
+            'firstname' => $request->full_name,
+            // "lastname" => "Doe",
+            // "email" => "John.doe@gmail.com",
+            "phone_number" => [
+                "number" =>  $request->phone_number,
+                "country" => 'tg' // 'bj' Benin code
+            ]
+        ));
+
+        $transaction = Transaction::create([
+            'description' => "Vote pour {$candidate->firstname} {$candidate->lastname}  ",
             'amount' => $amount,
             'currency' => ['iso' => 'XOF'],
-            'callback_url' => 'https://example.com/callback',
+            'callback_url' => route('fedapay.callback'),
             // 'callback_url' => "https://awless-ozell-fibriform.ngrok-free.dev",
             'customer' => [
-                'firstname' => $request->full_name,
-                'phone_number' => $request->phone_number,
-                "email" => "jsmith@example.com",
+                'id' => $client->id,
             ],
 
             'metadata' => [

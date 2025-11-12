@@ -13,6 +13,7 @@ class Competition extends Model
 
     protected $fillable = [
         'user_id',
+        'image',
         'name',
         'description',
         'start_date',

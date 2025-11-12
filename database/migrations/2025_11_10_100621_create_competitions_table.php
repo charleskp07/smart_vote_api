@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('competitions', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->onDelete('cascade');
+            $table->string('image');
             $table->string('name');
             $table->text('description')->nullable();
             $table->dateTime('start_date');

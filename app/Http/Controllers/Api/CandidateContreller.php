@@ -52,7 +52,7 @@ class CandidateContreller extends Controller
         $data = [
             'competition_id' => $request->competition_id,
             'photo' => $file ? $path : null,
-            // 'photo' => $request->photo,
+            'photo' => $request->photo,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'gender' => $request->gender,
@@ -74,6 +74,7 @@ class CandidateContreller extends Controller
                 'message' => 'Candidat créée avec succès',
                 'data' => $candidate
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
