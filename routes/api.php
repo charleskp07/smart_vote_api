@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/login', function (Request $request) {
+Route::get('/', function (Request $request) {
    return response()->json(['error' => 'Non authentifié'], 401);
 })->name("login");
 
@@ -36,13 +36,14 @@ Route::middleware("auth:sanctum")->group(function () {
    
    Route::post('/logout', [AuthController::class, 'logout']);
    
-   Route::apiResource('/competitions', CompetitionContreller::class);
-   Route::apiResource('/candidates', CandidateContreller::class);
+   Route::apiResource('/organizer/competitions', CompetitionContreller::class);
+   Route::apiResource('/organizer/candidates', CandidateContreller::class);
    
    Route::middleware([SuperAdminMiddleware::class])->group(function () {
       Route::apiResource('/admin/competitions', ADMINCompetitionController::class);
       Route::apiResource('/admin/candidates', ADMINCandidateController::class);
       Route::apiResource("/admin/users", UserController::class);
+      Route::post("/admin/users/{id}",[ UserController::class, 'update']);
       Route::get("/admin/users/trashed", [UserController::class, 'trash']);
    });
 });

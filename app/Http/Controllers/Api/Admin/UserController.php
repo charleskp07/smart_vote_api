@@ -18,7 +18,6 @@ class UserController extends Controller
         try {
 
             return User::all();
-
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -98,31 +97,32 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $user = User::find($id);
+
+        if (!$user) {
+            return [
+                "message" => "Utilisateur non trouvé !",
+            ];
+        }
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password,
+            'password' => $request->password ? $request->password : $user->password,
             'phone' => $request->phone,
         ];
 
         try {
 
-            $user = User::find($id);
-
-            if (!$user) {
-                return [
-                    "message" => "Utilisateur non trouvé !",
-                ];
-            }
 
             $user->update($data);
+            return $request->all();
 
             return response()->json([
                 'success' => true,
                 'message' => "Utilisateur mise à jour avec succes",
                 'data' => $user,
-            ], 201);
+            ], 200);
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -159,8 +159,6 @@ class UserController extends Controller
             return [
                 "message"  => "Impossible de s'auto-supprimer"
             ];
-
-
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -182,7 +180,6 @@ class UserController extends Controller
                 'message' => "Corbeille",
                 'data' => $trashed,
             ], 200);
-
         } catch (\Exception $ex) {
             return response()->json([
                 'success' => false,
@@ -190,6 +187,5 @@ class UserController extends Controller
                 'error' => $ex->getMessage()
             ], 500);
         }
-
     }
 }

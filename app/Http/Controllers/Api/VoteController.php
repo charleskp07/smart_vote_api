@@ -44,8 +44,8 @@ class VoteController extends Controller
 
         $client = Customer::create(array(
             'firstname' => $request->full_name,
-            // "lastname" => "Doe",
-            // "email" => "John.doe@gmail.com",
+            "lastname" => "",
+            "email" => $request->email,
             "phone_number" => [
                 "number" =>  $request->phone_number,
                 "country" => 'tg' // 'bj' Benin code
